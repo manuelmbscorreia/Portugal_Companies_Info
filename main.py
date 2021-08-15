@@ -18,12 +18,48 @@ import numpy as np
 
 #Lista de Empresas a Extrair
 #No futuro fazer Webscrap de Site com Lista
-nome_do_csv = input("Escreva o nome do ficheiro .csv com nome de empresas na primeira coluna - ")
 
-#É preciso alterar o local da pasta, este é adaptado ao meu pc
-bd_conecta = pd.read_csv(f"~/Documents/Conecta_PME_40/WebScrap_CSV/{nome_do_csv}.csv")
+def inputes():
 
-bd_conecta
+    path = input("Qual é a localização dos ficheiros a trabalhar? Insira o '/' no inicio e no fim. Sem '.' ou '~' antes. Se estiver no linux inclua apenas o que vier depois do seu nome de utilizador - ")
+
+    nome_do_csv = input("Escreva o nome do ficheiro .csv com os nome das empresas portuguesas a extrair. Este tem de ter, na primeira coluna, a informação e o titulo de 'empresa', nao inclua o ending de '.csv' - ")
+
+    return path, nome_do_csv
+
+path, nome_do_csv = inputes()
+
+print(f"Path = {path} & File name = {nome_do_csv}")
+
+def operating_systems(path, nome_do_csv):
+    try:
+        linux_ou_w = input("Escreva 'sim' se usa Windows e 'nao' se usa Linux - ")
+
+        if linux_ou_w == "sim":
+            q = "."
+            rumo = f"{q}{path}{nome_do_csv}"
+            print(rumo)
+            bd_conecta = pd.read_csv(f"{rumo}.csv")
+
+        elif linux_ou_w == "nao":
+            q = "~"
+            rumo = f"{q}{path}{nome_do_csv}"
+            print(rumo)
+            bd_conecta = pd.read_csv(f"{rumo}.csv")
+
+        else:
+            print("Por favor introduza a informação correcta")
+            operating_systems()
+
+    except:
+        print("A localização dos ficheiros ou o nomes dos ficheiros estão incorrectos. Por favor repita o processo.")
+        inputes()
+        path, nome_do_csv = inputes()
+        operating_systems()
+
+    return bd_conecta, path, nome_do_csv, q
+
+bd_conecta, path, nome_do_csv, q = operating_systems(path, nome_do_csv)
 
 empresas = []
 
@@ -37,9 +73,7 @@ for x in bd_conecta["empresa"]:
 
 print(empresas)
 
-#Setup Chromium-Browser on Linux
-
-
+#Setup Firefox on Linux
 browser = webdriver.Firefox()
 
 tempo = 1.5
@@ -175,68 +209,72 @@ for empresa in empresas:
     soup = BeautifulSoup(content)
 
     try:
+         empresa_search = soup.find("h3", {"class": "name"})
 
-        empresa_search = soup.find("h3", {"class": "name"})
+         a = empresa_search.find("a", href=True)
 
-        a = empresa_search.find("a", href=True)
+         if a is not None:
 
-        if a is not None:
+             titles_rigor = []
+             datas_rigor = []
+             listas_empresas_r = []
 
-            titles_rigor = []
-            datas_rigor = []
-            listas_empresas_r = []
+             url_empresa = a["href"]
 
-            url_empresa = a["href"]
+             if "municipio" in linke.split("+"):
+                 url_empresa = linke.replace("+", "-")
+                 url_empresa = f"https://www.rigorbiz.pt{url_empresa}"
 
-            url_empresa = f"https://www.rigorbiz.pt{url_empresa}"
+             else:
+                url_empresa = f"https://www.rigorbiz.pt{url_empresa}"
 
-            # Entrar da página da empresa dentro da Rigorbiz
+             # Entrar da página da empresa dentro da Rigorbiz
 
-            browser.get(url_empresa)
+             browser.get(url_empresa)
 
-            print(f"Entramos na página de {empresa} dentro de 'Rigorbiz'")
+             print(f"Entramos na página de {empresa} dentro de 'Rigorbiz'")
 
-            time.sleep(tempo)
+             time.sleep(tempo)
 
-            content = browser.page_source
-            soup = BeautifulSoup(content)
+             content = browser.page_source
+             soup = BeautifulSoup(content)
 
-            # Titulos
-            scrap2 = soup.find_all("div", {"class": 'entity-attributes-title'})
-            for a in scrap2:
-                a = a.text
-                titles_rigor.append(a)
-                listas_empresas_r.append(empresa)
+             # Titulos
+             scrap2 = soup.find_all("div", {"class": 'entity-attributes-title'})
+             for a in scrap2:
+                 a = a.text
+                 titles_rigor.append(a)
+                 listas_empresas_r.append(empresa)
 
-            # Dados
-            scrap = soup.find_all("div", {"class": 'entity-attributes-data'})
-            for a in scrap:
-                a = a.text
-                datas_rigor.append(a)
+             # Dados
+             scrap = soup.find_all("div", {"class": 'entity-attributes-data'})
+             for a in scrap:
+                 a = a.text
+                 datas_rigor.append(a)
 
-            # Arranjar Tabelas
+             # Arranjar Tabelas
 
-            del datas_rigor[2]
-            del datas_rigor[3:7]
-            datas_rigor[4] = str(datas_rigor[4]).replace("\n", " ")
-            data_rigor.extend(datas_rigor)
+             del datas_rigor[2]
+             del datas_rigor[3:7]
+             datas_rigor[4] = str(datas_rigor[4]).replace("\n", " ")
+             data_rigor.extend(datas_rigor)
 
-            del titles_rigor[2]
-            del titles_rigor[3:7]
-            title_rigor.extend(titles_rigor)
+             del titles_rigor[2]
+             del titles_rigor[3:7]
+             title_rigor.extend(titles_rigor)
 
-            del listas_empresas_r[2]
-            del listas_empresas_r[3:7]
-            lista_empresas_r.extend(listas_empresas_r)
+             del listas_empresas_r[2]
+             del listas_empresas_r[3:7]
+             lista_empresas_r.extend(listas_empresas_r)
 
-            print(f"Foi extraída informação de {empresa} em 'Rigorbiz'")
+             print(f"Foi extraída informação de {empresa} em 'Rigorbiz'")
 
-        else:
-            pass
+         else:
+             pass
 
     except:
-        print(f"Info de {empresa} em 'Rigorbiz' foi ignorada")
-        pass
+         print(f"Info de {empresa} em 'Rigorbiz' foi ignorada")
+         pass
 
 
     pausa = time.time()
@@ -274,7 +312,7 @@ df = df[df.tipo_de_dado != "Morada"]
 df2 = df.append(df1)
 
 #Eliminar mais Info a mais
-df2.drop_duplicates(subset=['tipo_de_dado'])
+df2.drop_duplicates(["empresa", "tipo_de_dado"], inplace = True)
 
 #Copiar porque posso
 df3 = df2
@@ -295,10 +333,17 @@ df3.drop(columns =["CAE"], inplace = True)
 #Copiar outra vez porque posso
 df4 = df3
 novo = df4["Endereço"].str.split('([0-9]{4} - [0-9]{3})', expand = True)
-df4["Rua"] = novo [0]
+df4["Rua"] = novo[0]
 df4["Localidade"] = novo[2]
 df4["Código Postal"] = df3["Endereço"].str.extract(r'([0-9]{4} - [0-9]{3})')
+
+
 df4.reset_index(level="empresa", inplace=True)
 
 
-df4.to_csv(f"~/Documents/Conecta_PME_40/WebScrap_CSV/Extracoes/{nome_do_csv}_EXTRAIDO.csv", sep = ",", index = False, header = True)
+def fim(path, q , nome_do_csv):
+    df4.to_csv(f"{q}{path}{nome_do_csv}_EXTRAIDO.csv", sep = ",", index = False, header = True)
+    return path
+
+fim(path, q, nome_do_csv)
+
