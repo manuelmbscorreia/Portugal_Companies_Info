@@ -1,4 +1,4 @@
-# extractptcompaniesinfo
+# Portugal_Companies_Info
 
 This file allows you to extract information about companies in Portugal, from two different websites.
 
