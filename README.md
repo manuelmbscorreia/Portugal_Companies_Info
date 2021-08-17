@@ -10,6 +10,6 @@ directing to the path of the .xml file with the company list and the path where 
 The code can proccess around 250 companies per hour. Run in a terminal. Not in Google Colab or Pycharm. If you are using Pycharm, choose an option to run in a 
 Terminal, otherwise the code will be interrupted without warning and without any error. Anyway, a solution could be to split into lists with only 3.000 companies. 
 
-The project is not complete, but someone who knows how to code with Python can use this with a few twecks.
+The project is not complete in terms of an amazing user experience, but someone who knows how to code with Python can use this with a few twecks.
 
 Thanks you!
